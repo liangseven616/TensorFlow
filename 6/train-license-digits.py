@@ -7,6 +7,8 @@ import random
 import numpy as np
 import tensorflow as tf
 from PIL import Image
+
+
 SIZE = 1280
 WIDTH = 32
 HEIGHT = 40
@@ -28,7 +30,15 @@ def conv_layer(inputs, W, b, conv_strides, kernel_size, pool_strides, padding):
 # 定义全连接层函数
 def full_connect(inputs, W, b):
     return tf.nn.relu(tf.matmul(inputs, W) + b)
-if __name__ =='__main__' and sys.argv[1]=='train':
+
+
+
+
+
+#训练数据集
+def train():
+
+    print("开始读取数据！")
     # 第一次遍历图片目录是为了获取图片总数
     input_count = 0
     for i in range(0,NUM_CLASSES):
@@ -59,6 +69,7 @@ if __name__ =='__main__' and sys.argv[1]=='train':
                 input_labels[index][i] = 1
                 index += 1
     # 第一次遍历图片目录是为了获取图片总数
+    print("第一次遍历结束!\n")
     val_count = 0
     for i in range(0,NUM_CLASSES):
         dir = './6/tf_car_license_dataset/train_images/validation-set/%s/' % i           # 这里可以改成你自己的图片目录，i为分类标签
@@ -87,6 +98,8 @@ if __name__ =='__main__' and sys.argv[1]=='train':
                             val_images[index][w+h*width] = 1
                 val_labels[index][i] = 1
                 index += 1
+    print("第二次遍历结束!\n")
+
     with tf.Session() as sess:
         # 第一个卷积层
         W_conv1 = tf.Variable(tf.truncated_normal([8, 8, 1, 16], stddev=0.1), name="W_conv1")
@@ -120,13 +133,9 @@ if __name__ =='__main__' and sys.argv[1]=='train':
         correct_prediction = tf.equal(tf.argmax(y_conv, 1), tf.argmax(y_, 1))
         accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
         sess.run(tf.global_variables_initializer())
-        time_elapsed = time.time() - time_begin
-        print("读取图片文件耗费时间：%d秒" % time_elapsed)
-        time_begin = time.time()
         print ("一共读取了 %s 个训练图像， %s 个标签" % (input_count, input_count))
         # 设置每次训练op的输入个数和迭代次数，这里为了支持任意图片总数，定义了一个余数remainder，譬如，如果每次训练op的输入个数为60，图片总数为150张，则前面两次各输入60张，最后一次输入30张（余数30）
         batch_size = 60
-        iterations = iterations
         batches_count = int(input_count / batch_size)
         remainder = input_count % batch_size
         print ("训练数据集分成 %s 批, 前面每批 %s 个数据，最后一批 %s 个数据" % (batches_count+1, batch_size, remainder))
@@ -146,9 +155,6 @@ if __name__ =='__main__' and sys.argv[1]=='train':
                 if iterate_accuracy >= 0.9999 and it >= iterations:
                     break;
         print ('完成训练!')
-        time_elapsed = time.time() - time_begin
-        print ("训练耗费时间：%d秒" % time_elapsed)
-        time_begin = time.time()
         # 保存训练结果
         if not os.path.exists(SAVER_DIR):
             print ('不存在训练数据保存目录，现在创建保存目录')
@@ -156,7 +162,9 @@ if __name__ =='__main__' and sys.argv[1]=='train':
         # 初始化saver
         saver = tf.train.Saver()            
         saver_path = saver.save(sess, "%smodel.ckpt"%(SAVER_DIR))
-if __name__ =='__main__' and sys.argv[1]=='predict':
+
+#预测函数
+def predication():
     saver = tf.train.import_meta_graph("%smodel.ckpt.meta"%(SAVER_DIR))
     with tf.Session() as sess:
         model_file=tf.train.latest_checkpoint(SAVER_DIR)
@@ -223,3 +231,7 @@ if __name__ =='__main__' and sys.argv[1]=='predict':
             license_num = license_num + LETTERS_DIGITS[max1_index]
             print ("概率：  [%s %0.2f%%]    [%s %0.2f%%]    [%s %0.2f%%]" % (LETTERS_DIGITS[max1_index],max1*100, LETTERS_DIGITS[max2_index],max2*100, LETTERS_DIGITS[max3_index],max3*100))
         print ("车牌编号是: 【%s】" % license_num)
+
+
+if __name__ == "__main__":
+    train()

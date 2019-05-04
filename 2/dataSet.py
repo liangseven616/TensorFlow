@@ -54,7 +54,7 @@ def load_train(train_path,image_size,classes):
         path = train_path + classes[index]
         files = os.listdir(path)
         for f in files:
-            if f.split('.')[-1] == 'jpg':
+            if f.split('.')[-1] == 'jpg': 
                 f = os.path.join(path,f)
                 image = cv2.imread(f)
                 image = cv2.resize(image,(image_size,image_size),0,0,cv2.INTER_LINEAR)

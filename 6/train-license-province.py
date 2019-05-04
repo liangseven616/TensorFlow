@@ -28,8 +28,13 @@ def conv_layer(inputs, W, b, conv_strides, kernel_size, pool_strides, padding):
 # 定义全连接层函数
 def full_connect(inputs, W, b):
     return tf.nn.relu(tf.matmul(inputs, W) + b)
-if __name__ =='__main__' and sys.argv[1]=='train':
+
+
+
+
+def train():
     # 第一次遍历图片目录是为了获取图片总数
+    print("start!")
     input_count = 0
     for i in range(0,NUM_CLASSES):
         dir = './6/tf_car_license_dataset/train_images/training-set/chinese-characters/%s/' % i           # 这里可以改成你自己的图片目录，i为分类标签
@@ -122,13 +127,12 @@ if __name__ =='__main__' and sys.argv[1]=='train':
         # 初始化saver
         saver = tf.train.Saver()
         sess.run(tf.global_variables_initializer())
-        time_elapsed = time.time() - time_begin
+        time_elapsed = time.time()
         print("读取图片文件耗费时间：%d秒" % time_elapsed)
         time_begin = time.time()
         print ("一共读取了 %s 个训练图像， %s 个标签" % (input_count, input_count))
         # 设置每次训练op的输入个数和迭代次数，这里为了支持任意图片总数，定义了一个余数remainder，譬如，如果每次训练op的输入个数为60，图片总数为150张，则前面两次各输入60张，最后一次输入30张（余数30）
         batch_size = 60
-        iterations = iterations
         batches_count = int(input_count / batch_size)
         remainder = input_count % batch_size
         print ("训练数据集分成 %s 批, 前面每批 %s 个数据，最后一批 %s 个数据" % (batches_count+1, batch_size, remainder))
@@ -156,7 +160,13 @@ if __name__ =='__main__' and sys.argv[1]=='train':
             print ('不存在训练数据保存目录，现在创建保存目录')
             os.makedirs(SAVER_DIR)
         saver_path = saver.save(sess, "%smodel.ckpt"%(SAVER_DIR))
-if __name__ =='__main__' and sys.argv[1]=='predict':
+
+
+
+
+
+
+def predict():
     saver = tf.train.import_meta_graph("%smodel.ckpt.meta"%(SAVER_DIR))
     with tf.Session() as sess:
         model_file=tf.train.latest_checkpoint(SAVER_DIR)
@@ -223,3 +233,7 @@ if __name__ =='__main__' and sys.argv[1]=='predict':
             nProvinceIndex = max1_index
             print ("概率：  [%s %0.2f%%]    [%s %0.2f%%]    [%s %0.2f%%]" % (PROVINCES[max1_index],max1*100, PROVINCES[max2_index],max2*100, PROVINCES[max3_index],max3*100))
         print ("省份简称是: %s" % PROVINCES[nProvinceIndex])
+
+
+if __name__ == "__main__":
+    train()

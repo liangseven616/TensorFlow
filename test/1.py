@@ -15,7 +15,8 @@ for line in data:
     if i>3:
         ob = line.split()
         tem.append(float(ob[0]))
-        th.append(float(ob[1]))
+        th.append(float(ob[1]
+        ))
     i=i+1
 
 x = np.array(tem)
