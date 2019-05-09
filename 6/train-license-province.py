@@ -7,6 +7,9 @@ import random
 import numpy as np
 import tensorflow as tf
 from PIL import Image
+from tensorflow.python.framework import graph_util
+
+
 SIZE = 1280
 WIDTH = 32
 HEIGHT = 40
@@ -46,7 +49,7 @@ def train():
     input_labels = np.array([[0]*NUM_CLASSES for i in range(input_count)])
     # 第二次遍历图片目录是为了生成图片数据和标签
     index = 0
-    for i in range(0,NUM_CLASSES):
+    for i in range(0,NUM_CLASSES): 
         dir = './6/tf_car_license_dataset/train_images/training-set/chinese-characters/%s/' % i          # 这里可以改成你自己的图片目录，i为分类标签
         for rt, dirs, files in os.walk(dir):
             for filename in files:
@@ -119,13 +122,13 @@ def train():
         W_fc2 = tf.Variable(tf.truncated_normal([512, NUM_CLASSES], stddev=0.1), name="W_fc2")
         b_fc2 = tf.Variable(tf.constant(0.1, shape=[NUM_CLASSES]), name="b_fc2")
         # 定义优化器和训练op
-        y_conv = tf.matmul(h_fc1_drop, W_fc2) + b_fc2
+        y_conv = tf.add(tf.matmul(h_fc1_drop, W_fc2),b_fc2,name="y_conv")
         cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y_conv))
         train_step = tf.train.AdamOptimizer((1e-4)).minimize(cross_entropy)
         correct_prediction = tf.equal(tf.argmax(y_conv, 1), tf.argmax(y_, 1))
         accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
         # 初始化saver
-        saver = tf.train.Saver()
+        #saver = tf.train.Saver()
         sess.run(tf.global_variables_initializer())
         time_elapsed = time.time()
         print("读取图片文件耗费时间：%d秒" % time_elapsed)
@@ -159,8 +162,10 @@ def train():
         if not os.path.exists(SAVER_DIR):
             print ('不存在训练数据保存目录，现在创建保存目录')
             os.makedirs(SAVER_DIR)
-        saver_path = saver.save(sess, "%smodel.ckpt"%(SAVER_DIR))
-
+        #saver_path = saver.save(sess, "%smodel.ckpt"%(SAVER_DIR))
+        constant_graph = graph_util.convert_variables_to_constants(sess,sess.graph_def,["y_conv"])
+        with tf.gfile.FastGFile(SAVER_DIR+'model.pb', mode='wb') as f:
+            f.write(constant_graph.SerializeToString())
 
 
 
