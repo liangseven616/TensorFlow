@@ -1,4 +1,4 @@
-import cv2
+import cv2.cv2 as cv2
 import numpy
 
 from utils import get_image_paths, load_images, stack_images
